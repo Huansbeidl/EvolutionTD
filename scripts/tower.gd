@@ -12,7 +12,7 @@ func _process(_delta: float) -> void:
 	# Update who we are looking at
 	current_target = get_highest_priority_target()
 	if is_instance_valid(current_target):
-		look_at(current_target.global_position)
+		$Sprite2D.look_at(current_target.global_position)
 
 func get_highest_priority_target() -> Node2D:
 	# Filter out any enemies that were deleted but are still in the array

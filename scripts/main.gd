@@ -53,8 +53,9 @@ func _on_spawn_timer_timeout() -> void: # This function spawns new enemies along
 	
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		var snapped_pos = get_snapped_position(get_global_mouse_position())
 		if current_gold >= tower_cost and is_placement_valid():
-			place_tower(event.position)
+			place_tower(snapped_pos)
 		elif current_gold < tower_cost:
 			print("Not enough gold!")
 		else:
@@ -86,7 +87,7 @@ func _process(_delta: float) -> void:
 			wave_message_shown = true
 	
 	# Logic for building
-	ghost.global_position = get_global_mouse_position()
+	ghost.global_position = get_snapped_position(get_global_mouse_position())
 	if current_gold >= tower_cost and is_placement_valid():
 		ghost.modulate = Color(0,1,0,0.5)
 	else:
@@ -117,3 +118,8 @@ func spawn_enemy() -> void:
 	# Build the hierarchy
 	path_node.add_child(mover)
 	mover.add_child(new_enemy)
+
+func get_snapped_position(raw_pos: Vector2) -> Vector2:
+	var snapped_x = floor(raw_pos.x / 32) * 32 +16
+	var snapped_y = floor(raw_pos.y / 32) * 32 +16
+	return Vector2(snapped_x, snapped_y)

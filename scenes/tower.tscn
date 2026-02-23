@@ -8,7 +8,7 @@
 radius = 260.55518
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ktxwe"]
-size = Vector2(32, 32)
+size = Vector2(30, 30)
 
 [node name="Tower" type="Node2D"]
 script = ExtResource("1_2x682")
