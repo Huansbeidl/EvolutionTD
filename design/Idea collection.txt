@@ -1,0 +1,7 @@
+Summary:
+
+	Basic TowerDefense game that let's you combine different properties (e.g. towers and bullet types) to create unique combinations. Maybe combine towers like in BALL X PIT.
+	
+	Ability to draft enemy waves together to min max farmability of waves with tower setup.
+	
+	
