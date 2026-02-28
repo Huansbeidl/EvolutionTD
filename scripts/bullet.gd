@@ -1,7 +1,7 @@
 extends Area2D
 
-@export var speed: float = 600.0
-@export var damage: int = 5
+@export var speed: float = 0.0
+@export var damage: int = 0
 
 var target: Node2D = null
 

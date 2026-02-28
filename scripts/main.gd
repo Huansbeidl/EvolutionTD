@@ -1,7 +1,7 @@
 extends Node2D
 
 # This creates the slot in the Inspector you were looking for
-@export var enemy_scene: PackedScene 
+@export var enemy_scenes: Array[PackedScene] 
 @export var tower_scene: PackedScene
 
 @export var starting_lives: int = 10
@@ -112,7 +112,8 @@ func spawn_enemy() -> void:
 	mover.set_script(load("res://scripts/mover.gd"))
 
 	#Instantiate the Enemy Scene
-	var new_enemy = enemy_scene.instantiate()
+	var random_index = randi() % enemy_scenes.size()
+	var new_enemy = enemy_scenes[random_index].instantiate()
 	mover.speed = new_enemy.speed
 	
 	# Build the hierarchy

@@ -1,9 +1,11 @@
 extends Area2D
+class_name Enemy
 
 @onready var health_bar = $ProgressBar
 
 @export var speed: float = 150.0
 @export var health: int = 10
+@export var gold_reward: int = 25
 var is_dead: bool = false
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
