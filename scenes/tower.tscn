@@ -5,7 +5,7 @@
 [ext_resource type="PackedScene" uid="uid://br18dec5slq8t" path="res://scenes/bullet.tscn" id="2_ktxwe"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_ay4al"]
-radius = 260.55518
+radius = 90.005554
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ktxwe"]
 size = Vector2(30, 30)

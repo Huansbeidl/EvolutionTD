@@ -2,6 +2,7 @@ extends Node2D
 class_name Tower
 
 @export var bullet_scene: PackedScene
+@export var cost: int = 50
 @export var damage: int = 5
 @export var fire_rate: float = 1.0 # Seconds between shots
 @export var bullet_speed: float = 600.0

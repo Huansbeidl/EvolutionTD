@@ -1,8 +1,8 @@
 extends Node2D
 
 # This creates the slot in the Inspector you were looking for
-@export var enemy_scenes: Array[PackedScene] 
-@export var tower_scene: PackedScene
+@export var enemy_scenes: Array[PackedScene]
+@export var tower_scenes: Array[PackedScene]
 
 @export var starting_lives: int = 10
 @export var starting_gold: int = 100
@@ -32,10 +32,13 @@ var current_gold: int:
 		current_gold = value
 		if gold_label: gold_label.text = "Gold" + str(current_gold)
 
+var selected_tower_index: int = 0
+
 func _ready() -> void:
 	add_to_group("game_manager")
 	current_lives = starting_lives
 	current_gold = starting_gold
+	switch_tower(0)
 	
 func lose_life():
 	current_lives -= 1
@@ -63,20 +66,43 @@ func _unhandled_input(event: InputEvent) -> void:
 			
 func is_placement_valid() -> bool:
 	# Get Area2D from the Ghost
-	var ghost_area = get_node_or_null("TowerGhost/PlacementCheck")
-	# Safety Check: If the node is missing, we assume invalid to prevent building at all
-	if ghost_area == null: # alternatively "if not ghost_area: return false" 
-		return false
-	
-	var overlapping_areas = ghost_area.get_overlapping_areas()
-	var overlapping_bodies = ghost_area.get_overlapping_bodies()
-	return overlapping_areas.size() == 0 and overlapping_bodies.size() == 0
+	for child in ghost.get_children():
+		var ghost_area = child.get_node_or_null("PlacementCheck")
+		if ghost_area:
+			var overlapping_areas = ghost_area.get_overlapping_areas()
+			var overlapping_bodies = ghost_area.get_overlapping_bodies()
+			return overlapping_areas.size() == 0 and overlapping_bodies.size() == 0
+	return false
 
 func place_tower(pos: Vector2) -> void:
-	current_gold -= tower_cost
-	var new_tower = tower_scene.instantiate()
-	new_tower.position = pos
-	$TowerContainer.add_child(new_tower)
+	var scene_to_place = tower_scenes[selected_tower_index].instantiate()
+	if current_gold >= scene_to_place.cost:
+		current_gold -= scene_to_place.cost
+		scene_to_place.position = pos
+		$TowerContainer.add_child(scene_to_place)
+	
+func switch_tower(index: int):
+	selected_tower_index = index
+	# Clear existing preview
+	for child in ghost.get_children():
+		if child.name != "PlacementCheck":
+			child.queue_free()
+	
+	# Add new preview
+	var preview = tower_scenes[index].instantiate()
+	# Disable logic as to not shoot or detect enemies
+	preview.set_process(false)
+	preview.set_physics_process(false)
+	# Disable its timer so it doesn't fire bullets
+	var timer = preview.get_node_or_null("ShootTimer")
+	if timer:
+		timer.stop()
+	# Disable its collision area so it doesn't detect enemies
+	var detection = preview.get_node_or_null("DetectionRange")
+	if detection:
+		detection.monitoring = false
+		detection.monitorable = false
+	ghost.add_child(preview)
 	
 func _process(_delta: float) -> void:
 	# Logic for checking if enemies are left
@@ -94,7 +120,11 @@ func _process(_delta: float) -> void:
 		ghost.modulate = Color(1,0,0,0.5)
 
 func _input(event: InputEvent) -> void:
-	if event.is_action_pressed("ui_accept"):
+	if event.is_action_pressed("tower_1"):
+		switch_tower(0)
+	elif event.is_action_pressed("tower_2"):
+		switch_tower(1)
+	elif event.is_action_pressed("ui_accept"):
 		if spawn_timer.is_stopped():
 			start_next_wave()
 			
@@ -103,22 +133,28 @@ func start_next_wave():
 	current_wave += 1
 	enemies_spawned_this_wave = 0
 	enemies_per_wave += 2
+	
 	spawn_timer.start()
-	print("Starting Wave: ", current_wave)
 	
 func spawn_enemy() -> void:
 	var mover = PathFollow2D.new() # Instantiate Mover
 	mover.loop = false # Prevents enemies from teleporting back to start
 	mover.set_script(load("res://scripts/mover.gd"))
-
+	
+	if enemy_scenes.size() == 0:
+		print("Error: No enemy scenes assigned in the Inspector!")
+		return
+		
 	#Instantiate the Enemy Scene
 	var random_index = randi() % enemy_scenes.size()
 	var new_enemy = enemy_scenes[random_index].instantiate()
-	mover.speed = new_enemy.speed
-	
-	# Build the hierarchy
+	new_enemy.set_wave_difficulty(current_wave)
+	# Build the hierarchy FIRST
 	path_node.add_child(mover)
 	mover.add_child(new_enemy)
+	# Set the movement speed AFTER
+	mover.speed = new_enemy.speed
+	# Apply health bonus LAST
 
 func get_snapped_position(raw_pos: Vector2) -> Vector2:
 	var snapped_x = floor(raw_pos.x / 32) * 32 +16

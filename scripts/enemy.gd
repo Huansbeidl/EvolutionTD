@@ -4,8 +4,12 @@ class_name Enemy
 @onready var health_bar = $ProgressBar
 
 @export var speed: float = 150.0
-@export var health: int = 10
 @export var gold_reward: int = 25
+@export var health: int = 10:
+	set(value):
+		health = value
+		if health_bar:
+			health_bar.value = health
 var is_dead: bool = false
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -34,3 +38,7 @@ func die() -> void:
 		main.current_gold += 25
 		print("Earned 25 Gold! Total: ", main.current_gold)
 	queue_free() # This is it's own function to add sounds etc. later
+	
+func set_wave_difficulty(wave: int):
+	var bonus = (wave - 1)*5
+	health +=bonus
