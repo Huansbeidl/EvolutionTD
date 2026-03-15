@@ -40,5 +40,6 @@ func die() -> void:
 	queue_free() # This is it's own function to add sounds etc. later
 	
 func set_wave_difficulty(wave: int):
-	var bonus = (wave - 1)*5
-	health +=bonus
+	var difficulty_multiplier = 1.0 + (wave * 0.01)
+	health = int(health * difficulty_multiplier)
+	 

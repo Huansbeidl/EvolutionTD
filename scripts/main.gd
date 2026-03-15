@@ -3,6 +3,8 @@ extends Node2D
 # This creates the slot in the Inspector you were looking for
 @export var enemy_scenes: Array[PackedScene]
 @export var tower_scenes: Array[PackedScene]
+@export var wave_sequence: Array[WaveData]
+var current_wave_index: int = 0
 
 @export var starting_lives: int = 10
 @export var starting_gold: int = 100
@@ -63,6 +65,9 @@ func _unhandled_input(event: InputEvent) -> void:
 			print("Not enough gold!")
 		else:
 			print("Can't build here!")
+	elif event.is_action_pressed("ui_accept"):
+		if spawn_timer.is_stopped() and wave_message_shown:
+			start_next_wave()
 			
 func is_placement_valid() -> bool:
 	# Get Area2D from the Ghost
@@ -111,6 +116,9 @@ func _process(_delta: float) -> void:
 		if active_enemies.size() == 0 and not wave_message_shown:
 			print("Wave ", current_wave, " complete! Press 'Spacebar' for next wave.")
 			wave_message_shown = true
+			
+	if wave_message_shown and Input.is_action_just_pressed("ui_accept"):
+		start_next_wave()
 	
 	# Logic for building
 	ghost.global_position = get_snapped_position(get_global_mouse_position())
@@ -125,18 +133,30 @@ func _input(event: InputEvent) -> void:
 	elif event.is_action_pressed("tower_2"):
 		switch_tower(1)
 	elif event.is_action_pressed("ui_accept"):
-		if spawn_timer.is_stopped():
+		if wave_message_shown:
 			start_next_wave()
 			
 func start_next_wave():
-	wave_message_shown = false
-	current_wave += 1
-	enemies_spawned_this_wave = 0
-	enemies_per_wave += 2
-	
-	spawn_timer.start()
+	if current_wave_index < wave_sequence.size():
+		var wave = wave_sequence[current_wave_index]
+		# Setup for the new wave
+		wave_message_shown = false
+		current_wave = current_wave_index
+		enemies_spawned_this_wave = 0
+		
+		spawn_timer.wait_time = wave.spawn_interval
+		spawn_timer.start()
+		current_wave_index += 1
+	else:
+		print("All waves completed!")
 	
 func spawn_enemy() -> void:
+	# 1 Get data for current wave
+	var wave = wave_sequence[current_wave_index - 1] 
+	# 2 Instantiate the enemy defined in the resources
+	var new_enemy = wave.enemy_scene.instantiate()
+	new_enemy.set_wave_difficulty(current_wave)
+	# 3 Setup the mover
 	var mover = PathFollow2D.new() # Instantiate Mover
 	mover.loop = false # Prevents enemies from teleporting back to start
 	mover.set_script(load("res://scripts/mover.gd"))
@@ -144,11 +164,7 @@ func spawn_enemy() -> void:
 	if enemy_scenes.size() == 0:
 		print("Error: No enemy scenes assigned in the Inspector!")
 		return
-		
-	#Instantiate the Enemy Scene
-	var random_index = randi() % enemy_scenes.size()
-	var new_enemy = enemy_scenes[random_index].instantiate()
-	new_enemy.set_wave_difficulty(current_wave)
+
 	# Build the hierarchy FIRST
 	path_node.add_child(mover)
 	mover.add_child(new_enemy)
