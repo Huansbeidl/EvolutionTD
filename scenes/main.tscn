@@ -1,12 +1,14 @@
-[gd_scene load_steps=9 format=3 uid="uid://nrm06dpl00wi"]
+[gd_scene load_steps=11 format=3 uid="uid://nrm06dpl00wi"]
 
 [ext_resource type="Script" uid="uid://dm500jpg2tcfu" path="res://scripts/main.gd" id="1_o5qli"]
 [ext_resource type="PackedScene" uid="uid://bf3dugnn4fsmi" path="res://scenes/enemy.tscn" id="2_0wfyh"]
 [ext_resource type="PackedScene" uid="uid://dqkeo7gvwglis" path="res://scenes/tower.tscn" id="4_jyhfs"]
 [ext_resource type="Texture2D" uid="uid://drqjro56momr0" path="res://sprites/tile_0111.png" id="4_tbgi4"]
 [ext_resource type="PackedScene" uid="uid://drwbdvijcdgsl" path="res://scenes/sniper_tower.tscn" id="4_tefeu"]
-[ext_resource type="Resource" uid="uid://21ktlt7fo6a2" path="res://tres/wave_01.tres" id="5_o6xl0"]
-[ext_resource type="Resource" uid="uid://b2pxrf841gbph" path="res://tres/wave_02.tres" id="6_tipki"]
+[ext_resource type="Script" uid="uid://d4fr3q3bpifmq" path="res://scripts/wave_data.gd" id="5_o6xl0"]
+[ext_resource type="Resource" uid="uid://dvytl7tjvaxg1" path="res://tres/wave_01.tres" id="6_tipki"]
+[ext_resource type="Resource" uid="uid://b2pxrf841gbph" path="res://tres/wave_02.tres" id="7_85g3d"]
+[ext_resource type="Resource" uid="uid://camh3ypfkpjsv" path="res://tres/wave_03.tres" id="8_choun"]
 
 [sub_resource type="Curve2D" id="Curve2D_sgp6g"]
 _data = {
@@ -18,7 +20,7 @@ point_count = 3
 script = ExtResource("1_o5qli")
 enemy_scenes = Array[PackedScene]([ExtResource("2_0wfyh")])
 tower_scenes = Array[PackedScene]([ExtResource("4_jyhfs"), ExtResource("4_tefeu")])
-wave_sequence = Array[Object]([ExtResource("5_o6xl0"), ExtResource("6_tipki")])
+wave_sequence = Array[ExtResource("5_o6xl0")]([ExtResource("6_tipki"), ExtResource("7_85g3d"), ExtResource("8_choun")])
 
 [node name="TileMapLayer" type="TileMapLayer" parent="."]
 
@@ -36,9 +38,6 @@ polygon = PackedVector2Array(-127, 143, 207, 143, 208, 571, 163, 571, 163, 193, 
 
 [node name="SpawnTimer" type="Timer" parent="."]
 autostart = true
-
-[node name="BasicTower_01" parent="." instance=ExtResource("4_jyhfs")]
-position = Vector2(348, 273)
 
 [node name="UI" type="CanvasLayer" parent="."]
 

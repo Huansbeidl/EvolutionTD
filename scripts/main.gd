@@ -5,6 +5,8 @@ extends Node2D
 @export var tower_scenes: Array[PackedScene]
 @export var wave_sequence: Array[WaveData]
 var current_wave_index: int = 0
+var current_wave_enemy_queue: Array = []
+var wave_is_active: bool = false
 
 @export var starting_lives: int = 10
 @export var starting_gold: int = 100
@@ -42,6 +44,9 @@ func _ready() -> void:
 	current_gold = starting_gold
 	switch_tower(0)
 	
+	wave_message_shown = true # Allows to spawn first wave
+	if wave_label: wave_label.text = "Press Space to Start"
+	
 func lose_life():
 	current_lives -= 1
 	print("Life lost! Remaining: ", current_lives)
@@ -70,14 +75,21 @@ func _unhandled_input(event: InputEvent) -> void:
 			start_next_wave()
 			
 func is_placement_valid() -> bool:
-	# Get Area2D from the Ghost
+	var snapped_pos = get_snapped_position(get_global_mouse_position())
+
+	# 1) Check for existing towers colision
+	for tower in $TowerContainer.get_children():
+		if tower.global_position.distance_to(snapped_pos) < 1.0:
+			return false
+			
+	# 2) Check for path colision
 	for child in ghost.get_children():
 		var ghost_area = child.get_node_or_null("PlacementCheck")
 		if ghost_area:
 			var overlapping_areas = ghost_area.get_overlapping_areas()
 			var overlapping_bodies = ghost_area.get_overlapping_bodies()
 			return overlapping_areas.size() == 0 and overlapping_bodies.size() == 0
-	return false
+	return true
 
 func place_tower(pos: Vector2) -> void:
 	var scene_to_place = tower_scenes[selected_tower_index].instantiate()
@@ -110,22 +122,22 @@ func switch_tower(index: int):
 	ghost.add_child(preview)
 	
 func _process(_delta: float) -> void:
-	# Logic for checking if enemies are left
-	if enemies_spawned_this_wave >= enemies_per_wave:
-		var active_enemies = get_tree().get_nodes_in_group("enemies")
-		if active_enemies.size() == 0 and not wave_message_shown:
-			print("Wave ", current_wave, " complete! Press 'Spacebar' for next wave.")
-			wave_message_shown = true
-			
-	if wave_message_shown and Input.is_action_just_pressed("ui_accept"):
-		start_next_wave()
-	
-	# Logic for building
+	# 1) Logic for building ghost
 	ghost.global_position = get_snapped_position(get_global_mouse_position())
 	if current_gold >= tower_cost and is_placement_valid():
 		ghost.modulate = Color(0,1,0,0.5)
 	else:
 		ghost.modulate = Color(1,0,0,0.5)
+	
+	# 2) Wave completion check - All spawned and despawned
+	if wave_is_active \
+	and not wave_message_shown \
+	and enemies_spawned_this_wave >= enemies_per_wave:
+		var active_enemies = get_tree().get_nodes_in_group("enemies")
+		if active_enemies.size() == 0:
+			wave_message_shown = true
+			wave_is_active = false
+			print("Wave ", current_wave, " complete! Press 'Spacebar' to start next wave.")
 
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("tower_1"):
@@ -139,38 +151,68 @@ func _input(event: InputEvent) -> void:
 func start_next_wave():
 	if current_wave_index < wave_sequence.size():
 		var wave = wave_sequence[current_wave_index]
+		print("DEBUG: Wave Index: ", current_wave_index)
+		print("DEBUG: Raw enemy_counts: ", wave.enemy_counts)
+		
+		if wave.enemy_counts.is_empty():
+			push_error("CRITICAL: Wave resource is empty! Check your .tres file.")
+			return
 		# Setup for the new wave
 		wave_message_shown = false
-		current_wave = current_wave_index
+		current_wave = current_wave_index + 1
+		
+		# Create a list of enemies to spawn for this wave
+		current_wave_enemy_queue.clear()
+		for enemy_scene in wave.enemy_counts:
+			var count = wave.enemy_counts[enemy_scene]
+			for i in range(count):
+				current_wave_enemy_queue.append(enemy_scene)
+		
+		# Shuffle list of enemies to randomize spawn order
+		current_wave_enemy_queue.shuffle()
+		
+		# Update total enemies for the timer check (to progress to next wave)
+		enemies_per_wave = wave.get_total_enemies()
 		enemies_spawned_this_wave = 0
 		
+		# Configure from Resource
 		spawn_timer.wait_time = wave.spawn_interval
+		wave_is_active = true
 		spawn_timer.start()
 		current_wave_index += 1
 	else:
 		print("All waves completed!")
 	
 func spawn_enemy() -> void:
-	# 1 Get data for current wave
-	var wave = wave_sequence[current_wave_index - 1] 
-	# 2 Instantiate the enemy defined in the resources
-	var new_enemy = wave.enemy_scene.instantiate()
+	#1 Check if anything is left to spawn
+	if current_wave_enemy_queue.is_empty():
+		return
+		
+	#2 Get scene from the queue
+	var enemy_scene = current_wave_enemy_queue.pop_front()
+	var new_enemy = enemy_scene.instantiate()
+	
+	#3 apply wave difficulty to the enemy
 	new_enemy.set_wave_difficulty(current_wave)
-	# 3 Setup the mover
+	
+	#4 Setup the mover
 	var mover = PathFollow2D.new() # Instantiate Mover
 	mover.loop = false # Prevents enemies from teleporting back to start
 	mover.set_script(load("res://scripts/mover.gd"))
 	
-	if enemy_scenes.size() == 0:
-		print("Error: No enemy scenes assigned in the Inspector!")
-		return
-
-	# Build the hierarchy FIRST
+	#5 add mover first and then enemy to mover
 	path_node.add_child(mover)
 	mover.add_child(new_enemy)
-	# Set the movement speed AFTER
+	
+	#6 Set the movement speed after the enemy is in the tree
 	mover.speed = new_enemy.speed
-	# Apply health bonus LAST
+	
+	#7 increment spawn counter
+	enemies_spawned_this_wave += 1
+	
+	#8 stop the timer if last enemy was spawned
+	if current_wave_enemy_queue.is_empty():
+		spawn_timer.stop()
 
 func get_snapped_position(raw_pos: Vector2) -> Vector2:
 	var snapped_x = floor(raw_pos.x / 32) * 32 +16
