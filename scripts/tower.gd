@@ -35,13 +35,17 @@ func _on_shoot_timer_timeout() -> void:
 		shoot()
 		
 func shoot() -> void:
-	if is_instance_valid(current_target):
-		var b = bullet_scene.instantiate()
-		b.damage = damage
-		b.speed = bullet_speed
-		b.target = current_target
-		get_tree().root.add_child(b)
-		b.global_position = muzzle.global_position
+	if not is_instance_valid(current_target): # validate before logic
+		return
+	perform_attack()
+	
+func perform_attack() -> void:	
+	var b = bullet_scene.instantiate()
+	b.damage = damage
+	b.speed = bullet_speed
+	b.target = current_target
+	get_tree().root.add_child(b)
+	b.global_position = muzzle.global_position
 
 func _on_area_2d_area_entered(area: Area2D) -> void:
 	if area.is_in_group("enemies"):
