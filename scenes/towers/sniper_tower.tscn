@@ -1,0 +1,20 @@
+[gd_scene load_steps=5 format=3 uid="uid://drwbdvijcdgsl"]
+
+[ext_resource type="PackedScene" uid="uid://dqkeo7gvwglis" path="res://scenes/towers/tower.tscn" id="1_8vriq"]
+[ext_resource type="Texture2D" uid="uid://ds7s2ndo4lr1d" path="res://sprites/tile_0121.png" id="2_q632g"]
+[ext_resource type="Script" uid="uid://61fsinkjf4ks" path="res://scripts/towers/sniper_tower.gd" id="2_shrgh"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_shrgh"]
+radius = 250.0
+
+[node name="SniperTower" instance=ExtResource("1_8vriq")]
+script = ExtResource("2_shrgh")
+damage = 30
+fire_rate = 3.0
+bullet_speed = 1200.0
+
+[node name="Sprite2D" parent="." index="0"]
+texture = ExtResource("2_q632g")
+
+[node name="CollisionShape2D" parent="DetectionRange" index="0"]
+shape = SubResource("CircleShape2D_shrgh")

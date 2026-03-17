@@ -1,7 +1,7 @@
 [gd_resource type="Resource" script_class="WaveData" load_steps=3 format=3 uid="uid://b2pxrf841gbph"]
 
 [ext_resource type="Script" uid="uid://d4fr3q3bpifmq" path="res://scripts/wave_data.gd" id="1_a4rgm"]
-[ext_resource type="PackedScene" uid="uid://dn1bhjicqeay6" path="res://scenes/fast_enemy.tscn" id="1_u113f"]
+[ext_resource type="PackedScene" uid="uid://dn1bhjicqeay6" path="res://scenes/enemies/fast_enemy.tscn" id="1_u113f"]
 
 [resource]
 script = ExtResource("1_a4rgm")

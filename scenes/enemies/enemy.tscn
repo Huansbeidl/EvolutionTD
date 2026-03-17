@@ -1,7 +1,7 @@
 [gd_scene load_steps=6 format=3 uid="uid://bf3dugnn4fsmi"]
 
 [ext_resource type="Texture2D" uid="uid://b4ojc7s3vjcv5" path="res://sprites/tile_0110.png" id="1_7p1mj"]
-[ext_resource type="Script" uid="uid://b33sfbc8xkavq" path="res://scripts/enemy.gd" id="1_md0e3"]
+[ext_resource type="Script" uid="uid://b33sfbc8xkavq" path="res://scripts/enemies/enemy.gd" id="1_md0e3"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_q4yn1"]
 radius = 20.09975

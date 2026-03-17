@@ -144,6 +144,8 @@ func _input(event: InputEvent) -> void:
 		switch_tower(0)
 	elif event.is_action_pressed("tower_2"):
 		switch_tower(1)
+	elif event.is_action_pressed("tower_3"):
+		switch_tower(2)
 	elif event.is_action_pressed("ui_accept"):
 		if wave_message_shown:
 			start_next_wave()

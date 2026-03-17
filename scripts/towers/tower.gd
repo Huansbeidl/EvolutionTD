@@ -18,7 +18,9 @@ func _ready() -> void:
 	shoot_timer.wait_time = fire_rate
 
 func _process(_delta: float) -> void:
-	# Update who we are looking at
+	look_at_target()
+
+func look_at_target() -> void:
 	current_target = get_highest_priority_target()
 	if is_instance_valid(current_target):
 		$Sprite2D.look_at(current_target.global_position)

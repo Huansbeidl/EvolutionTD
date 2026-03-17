@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3 uid="uid://dcxq0k6hgroou"]
+
+[ext_resource type="Script" uid="uid://dfo07gfi3go2k" path="res://scripts/projectiles/lightning_bolt.gd" id="1_dglf1"]
+
+[node name="LightningBolt" type="Node2D"]
+script = ExtResource("1_dglf1")
+
+[node name="Line2D" type="Line2D" parent="."]
+width = 3.0
+default_color = Color(0.9933676, 0.9933675, 1.4631748e-05, 1)

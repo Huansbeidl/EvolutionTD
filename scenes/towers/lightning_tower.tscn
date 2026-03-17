@@ -1,0 +1,21 @@
+[gd_scene load_steps=5 format=3 uid="uid://bhmql1qxx4n4y"]
+
+[ext_resource type="PackedScene" uid="uid://dqkeo7gvwglis" path="res://scenes/towers/tower.tscn" id="1_w104a"]
+[ext_resource type="Script" uid="uid://c7avplautpkr" path="res://scripts/towers/lightning_tower.gd" id="2_77lyr"]
+[ext_resource type="PackedScene" uid="uid://dcxq0k6hgroou" path="res://scenes/projectiles/lightning_bolt.tscn" id="3_l6rlk"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_77lyr"]
+radius = 250.0
+
+[node name="LightningTower" instance=ExtResource("1_w104a")]
+script = ExtResource("2_77lyr")
+chain_count = 2
+jump_radius = 600.0
+damage_multiplier = 0.5
+bolt_scene = ExtResource("3_l6rlk")
+
+[node name="Sprite2D" parent="." index="0"]
+self_modulate = Color(0.86893773, 0.0011622614, 0.94642645, 1)
+
+[node name="CollisionShape2D" parent="DetectionRange" index="0"]
+shape = SubResource("CircleShape2D_77lyr")

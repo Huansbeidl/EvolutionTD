@@ -8,4 +8,4 @@ func _ready() -> void:
 	bullet_speed = 1200.0
 
 func _process(_delta: float) -> void:
-	pass
+	look_at_target()
