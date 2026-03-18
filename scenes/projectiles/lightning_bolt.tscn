@@ -1,10 +1,22 @@
-[gd_scene load_steps=2 format=3 uid="uid://dcxq0k6hgroou"]
+[gd_scene load_steps=4 format=3 uid="uid://dcxq0k6hgroou"]
 
 [ext_resource type="Script" uid="uid://dfo07gfi3go2k" path="res://scripts/projectiles/lightning_bolt.gd" id="1_dglf1"]
+
+[sub_resource type="Curve" id="Curve_dglf1"]
+_limits = [0.0, 2.0, 0.0, 1.0]
+_data = [Vector2(0, 1.6005124), 0.0, 0.0, 0, 0, Vector2(0.40445864, 0.43533945), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="Gradient" id="Gradient_dglf1"]
+interpolation_color_space = 2
+offsets = PackedFloat32Array(0, 0.70652175, 1)
+colors = PackedColorArray(0.90274674, 0.9376671, 0, 1, 0.82824284, 0.9440233, 0.17881234, 1, 0, 0.9882353, 0.9882353, 1)
 
 [node name="LightningBolt" type="Node2D"]
 script = ExtResource("1_dglf1")
 
 [node name="Line2D" type="Line2D" parent="."]
 width = 3.0
+width_curve = SubResource("Curve_dglf1")
 default_color = Color(0.9933676, 0.9933675, 1.4631748e-05, 1)
+gradient = SubResource("Gradient_dglf1")
