@@ -20,6 +20,7 @@ func perform_attack() -> void:
 	# ^ initialized as an array from muzzle position because it will grow
 	# and we will use it to track all bolt_points
 	current_target.take_damage(damage) # damage primary target
+	bolt_points.append(current_target.global_position)
 	# Chain to secondary targets
 	var affected_targets = [current_target] 
 	# ^ initialized as an array from current_target
@@ -62,5 +63,6 @@ func find_next_target(origin: Vector2, exclude: Array) -> Node2D:
 	
 func spawn_bolt(points: Array):
 	var bolt = bolt_scene.instantiate()
-	get_tree().root.add_child(bolt)
+	get_tree().root.add_child(bolt) # get_parent().add_child(bolt) might be better
+	# if I add a moving camera and stuff
 	bolt.create_bolt(points)
